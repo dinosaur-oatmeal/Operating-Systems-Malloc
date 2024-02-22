@@ -1,3 +1,5 @@
+//Name: Will Maberry
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -82,6 +84,8 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
    // without finding a node or it ends pointing to a free node that has enough
    // space for the request.
    // 
+
+   // First Fit
    while (curr && !(curr->free && curr->size >= size)) 
    {
       *last = curr;
