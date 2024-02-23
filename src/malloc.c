@@ -254,17 +254,20 @@ void *malloc(size_t size)
             don't split the block.
    */
 
-   if(next->size > size)
+   // SPLIT
+   if(next != NULL && (next->size) > size)
    {
       if((next->size - size) > (sizeof(struct _block) + 4))
       {
          struct _block * tempPointer = next->next;
-         next->next = next + size;
+         printf("%ld %ld\n", sizeof(next), sizeof(int));
+         next->next = (struct _block * )((long long)next + (long long)size + (long long)sizeof(struct _block));
 
          next->next->next = tempPointer;
          next->next->size = next->size - size;
          next->next->free = true;
          next->size = size;
+         num_splits++;
       }
    }
 

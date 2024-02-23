@@ -17,6 +17,6 @@ int main()
   free(ptr3);
   free(ptr1);
   free(ptr2);
-  ptr1 = malloc(512);
+  ptr1 = malloc(4);
   free(ptr1);
 }
