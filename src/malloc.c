@@ -230,7 +230,6 @@ void *malloc(size_t size)
    {
       atexit_registered = 1;
       atexit( printStatistics );
-      num_mallocs--;
    }
 
    /* Align to multiple of 4 */
@@ -254,6 +253,20 @@ void *malloc(size_t size)
             If the leftover space in the new block is less than the sizeof(_block)+4 then
             don't split the block.
    */
+
+   if(next->size > size)
+   {
+      if((next->size - size) > (sizeof(struct _block) + 4))
+      {
+         struct _block * tempPointer = next->next;
+         next->next = next + size;
+
+         next->next->next = tempPointer;
+         next->next->size = next->size - size;
+         next->next->free = true;
+         next->size = size;
+      }
+   }
 
    /* Could not find free _block, so grow heap */
    if (next == NULL) 
