@@ -23,6 +23,10 @@ static int num_blocks        = 0;
 static int num_requested     = 0;
 static int max_heap          = 0;
 
+// Helpful commands (best fit)
+// env LD_PRELOAD=lib/libmalloc-bf.so tests/bfwf
+// set exec-wrapper env LD_PRELOAD=./lib/libmalloc-bf.so
+
 /*
  *  \brief printStatistics
  *
@@ -86,7 +90,7 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
    // 
 
    // First Fit
-   while (curr && !(curr->free && curr->size >= size)) 
+   while(curr && !(curr->free && curr->size >= size)) 
    {
       *last = curr;
       curr  = curr->next;
@@ -96,6 +100,16 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
 // \TODO Put your Best Fit code in this #ifdef block
 #if defined BEST && BEST == 0
    /** \TODO Implement best fit here */
+   *last = curr;
+
+   while(curr && !(curr->free && curr->size >= size))
+   {
+      if(curr->size < (*last)->size)
+      {
+         *last = curr;
+         curr = curr->next;
+      }
+   }
 #endif
 
 // \TODO Put your Worst Fit code in this #ifdef block
