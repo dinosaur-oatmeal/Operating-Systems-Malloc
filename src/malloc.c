@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+// used for INT_MAX and INT_MIN
 #include <limits.h>
 
 #define ALIGN4(s)         (((((s) - 1) >> 2) << 2) + 4)
@@ -53,6 +54,8 @@ void printStatistics( void )
   printf("max heap:\t%d\n", max_heap );
 }
 
+// TO DO: realloc, calloc, and nextFit
+
 struct _block 
 {
    size_t  size;         /* Size of the allocated _block of memory in bytes */
@@ -76,6 +79,7 @@ struct _block *heapList = NULL; /* Free list to track the _blocks available */
  * \TODO Implement Best Fit
  * \TODO Implement Worst Fit
  */
+ 
 struct _block *findFreeBlock(struct _block **last, size_t size) 
 {
    struct _block *curr = heapList;
@@ -106,12 +110,14 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
    struct _block *win = NULL;
    int winDiff = INT_MAX;
 
+   // loop through list and find remaining size of blocks
    while(curr)
    {
       if(curr->free && curr->size >= size)
       {
          int remainder = (int)curr->size - (int)size;
 
+         // find smallest remainder
          if(remainder < winDiff)
          {
             winDiff = remainder;
@@ -123,6 +129,7 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
       curr = curr->next;
    }
 
+   // set curr to block with smallest remainder
    curr = win;
 #endif
 
@@ -133,12 +140,14 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
    struct _block *win = NULL;
    int winDiff = INT_MIN;
 
+   // loop through list and find remaining size of blocks
    while(curr)
    {
       if(curr->free && curr->size >= size)
       {
          int remainder = (int)curr->size - (int)size;
 
+         // find largest remainder
          if(remainder > winDiff)
          {
             winDiff = remainder;
@@ -150,6 +159,7 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
       curr = curr->next;
    }
 
+   // set curr to block with largest remainder
    curr = win;
 #endif
 
@@ -175,6 +185,7 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
  */
 struct _block *growHeap(struct _block *last, size_t size) 
 {
+   // add to max_heap
    max_heap += size;
 
    /* Request more space from OS */
@@ -241,9 +252,10 @@ void *malloc(size_t size)
       return NULL;
    }
 
+   // add to the number of mallocs the program calls
    num_mallocs++;
-   /* Look for free _block.  If a free block isn't found then we need to grow our heap. */
 
+   /* Look for free _block.  If a free block isn't found then we need to grow our heap. */
    struct _block *last = heapList;
    struct _block *next = findFreeBlock(&last, size);
 
@@ -254,15 +266,17 @@ void *malloc(size_t size)
             don't split the block.
    */
 
-   // SPLIT
+   // split functionality
    if(next != NULL && (next->size) > size)
    {
       if((next->size - size) > (sizeof(struct _block) + 4))
       {
+         // create a temp pointer and update input (next) pointer
          struct _block * tempPointer = next->next;
-         printf("%ld %ld\n", sizeof(next), sizeof(int));
+         //printf("%ld %ld\n", sizeof(next), sizeof(int));
          next->next = (struct _block * )((long long)next + (long long)size + (long long)sizeof(struct _block));
 
+         // update pointers, sizes, and values of old and new blocks
          next->next->next = tempPointer;
          next->next->size = next->size - size;
          next->next->free = true;
@@ -320,8 +334,10 @@ void free(void *ptr)
 
    curr = heapList;
 
+   // loop through list
    while(curr)
    {
+      // find adjacent blocks that are free, update pointers, and combine the blocks
       if(curr->free && curr->next && curr->next->free)
       {
          curr->size += curr->next->size + sizeof(struct _block);
