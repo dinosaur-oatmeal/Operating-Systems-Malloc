@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <limits.h>
+
 #define ALIGN4(s)         (((((s) - 1) >> 2) << 2) + 4)
 #define BLOCK_DATA(b)     ((b) + 1)
 #define BLOCK_HEADER(ptr) ((struct _block *)(ptr) - 1)
@@ -101,20 +103,54 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
 #if defined BEST && BEST == 0
    /** \TODO Implement best fit here */
    *last = curr;
+   struct _block *win = NULL;
+   int winDiff = INT_MAX;
 
-   while(curr && !(curr->free && curr->size >= size))
+   while(curr)
    {
-      if(curr->size < (*last)->size)
+      if(curr->free && curr->size >= size)
       {
-         *last = curr;
-         curr = curr->next;
+         int remainder = (int)curr->size - (int)size;
+
+         if(remainder < winDiff)
+         {
+            winDiff = remainder;
+            win = curr;
+         }
       }
+
+      *last = curr;
+      curr = curr->next;
    }
+
+   curr = win;
 #endif
 
 // \TODO Put your Worst Fit code in this #ifdef block
 #if defined WORST && WORST == 0
    /** \TODO Implement worst fit here */
+   *last = curr;
+   struct _block *win = NULL;
+   int winDiff = INT_MIN;
+
+   while(curr)
+   {
+      if(curr->free && curr->size >= size)
+      {
+         int remainder = (int)curr->size - (int)size;
+
+         if(remainder > winDiff)
+         {
+            winDiff = remainder;
+            win = curr;
+         }
+      }
+
+      *last = curr;
+      curr = curr->next;
+   }
+
+   curr = win;
 #endif
 
 // \TODO Put your Next Fit code in this #ifdef block
@@ -139,6 +175,8 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
  */
 struct _block *growHeap(struct _block *last, size_t size) 
 {
+   max_heap += size;
+
    /* Request more space from OS */
    struct _block *curr = (struct _block *)sbrk(0);
    struct _block *prev = (struct _block *)sbrk(sizeof(struct _block) + size);
@@ -192,6 +230,7 @@ void *malloc(size_t size)
    {
       atexit_registered = 1;
       atexit( printStatistics );
+      num_mallocs--;
    }
 
    /* Align to multiple of 4 */
@@ -203,6 +242,7 @@ void *malloc(size_t size)
       return NULL;
    }
 
+   num_mallocs++;
    /* Look for free _block.  If a free block isn't found then we need to grow our heap. */
 
    struct _block *last = heapList;
@@ -219,6 +259,7 @@ void *malloc(size_t size)
    if (next == NULL) 
    {
       next = growHeap(last, size);
+      num_grows++;
    }
 
    /* Could not find free _block or grow heap, so just return NULL */
@@ -255,10 +296,25 @@ void free(void *ptr)
    struct _block *curr = BLOCK_HEADER(ptr);
    assert(curr->free == 0);
    curr->free = true;
+   num_frees++;
 
    /* TODO: Coalesce free _blocks.  If the next block or previous block 
             are free then combine them with this block being freed.
    */
+
+   curr = heapList;
+
+   while(curr)
+   {
+      if(curr->free && curr->next && curr->next->free)
+      {
+         curr->size += curr->next->size + sizeof(struct _block);
+         curr->next = curr->next->next;
+         num_coalesces++;
+      }
+
+      curr = curr->next;
+   }
 }
 
 void *calloc( size_t nmemb, size_t size )
