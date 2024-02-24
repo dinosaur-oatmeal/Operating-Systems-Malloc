@@ -3,7 +3,7 @@
 
 int main()
 {
-  printf("Running test 4 to test a block split and reuse\n");
+  //printf("Running test 4 to test a block split and reuse\n");
 
   char * ptr1 = ( char * ) malloc( 2048 );
 
