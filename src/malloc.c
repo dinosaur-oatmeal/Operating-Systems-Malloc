@@ -367,15 +367,32 @@ void *realloc( void *ptr, size_t size )
 {
    // \TODO Implement realloc
 
-   // make pointer to input and room for new pointer
-   struct _block *oldPointer = BLOCK_HEADER(ptr);
-   struct _block *newPointer = malloc(size);
+   // size 0
+   if(size == 0)
+   {
+      free(ptr);
+   }
 
-   // copy content from oldPointer and free it
-   memcpy(newPointer, oldPointer, oldPointer->size);
-   free(oldPointer);
+   // invalid pointer
+   else if(ptr == NULL)
+   {
+      return NULL;
+   }
+
+   // size > old size
+   else if(size > sizeof(ptr))
+   {
+      struct _block *newPointer = malloc(size);
+
+      // copy content from oldPointer and free it
+      memcpy(newPointer, ptr, size);
+      free(ptr);
+
+      return newPointer;
+   }
    
-   return newPointer;
+   // requested size < allocated
+   return ptr;
 }
 
 
