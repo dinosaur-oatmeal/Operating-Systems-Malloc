@@ -352,12 +352,36 @@ void free(void *ptr)
 void *calloc( size_t nmemb, size_t size )
 {
    // \TODO Implement calloc
+
+   if(nmemb == 0 || size == 0)
+   {
+      return NULL;
+   }
+
+   //find total size of inputs
+   size_t inputSize = nmemb * size;
+
+   malloc(inputSize);
+   
    return NULL;
 }
 
 void *realloc( void *ptr, size_t size )
 {
    // \TODO Implement realloc
+
+   // size 0 input (free)
+   if(size == 0 && ptr != NULL)
+   {
+      free(ptr);
+   }
+
+   // find new block or grow the heap
+   else
+   {
+      malloc(size);
+   }
+
    return NULL;
 }
 
