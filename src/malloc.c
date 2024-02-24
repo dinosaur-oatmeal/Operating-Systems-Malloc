@@ -353,36 +353,29 @@ void *calloc( size_t nmemb, size_t size )
 {
    // \TODO Implement calloc
 
-   if(nmemb == 0 || size == 0)
-   {
-      return NULL;
-   }
+   // find total size of inputs
+   size_t totalSize = nmemb * size;
 
-   //find total size of inputs
-   size_t inputSize = nmemb * size;
-
-   malloc(inputSize);
+   // malloc total size of inputs and set values to 0
+   struct _block *tempPointer = malloc(totalSize);
+   memset(tempPointer, 0, totalSize);
    
-   return NULL;
+   return BLOCK_DATA(heapList);
 }
 
 void *realloc( void *ptr, size_t size )
 {
    // \TODO Implement realloc
 
-   // size 0 input (free)
-   if(size == 0 && ptr != NULL)
-   {
-      free(ptr);
-   }
+   // make pointer to input and room for new pointer
+   struct _block *oldPointer = BLOCK_HEADER(ptr);
+   struct _block *newPointer = malloc(size);
 
-   // find new block or grow the heap
-   else
-   {
-      malloc(size);
-   }
-
-   return NULL;
+   // copy content from oldPointer and free it
+   memcpy(newPointer, oldPointer, oldPointer->size);
+   free(oldPointer);
+   
+   return newPointer;
 }
 
 
