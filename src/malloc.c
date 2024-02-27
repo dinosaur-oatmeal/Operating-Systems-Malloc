@@ -26,6 +26,12 @@ static int num_blocks        = 0;
 static int num_requested     = 0;
 static int max_heap          = 0;
 
+// reuse is how many times growheap isn't called
+// blocks are how many blocks we have at the end of the program?
+//    loop through list at the end of the program and add the number of nodes
+// requested is the toal amount of memory requested throughout the program's execution?
+//    add input size everytime malloc is called
+
 // Helpful commands (best fit)
 // env LD_PRELOAD=lib/libmalloc-bf.so tests/bfwf
 // set exec-wrapper env LD_PRELOAD=./lib/libmalloc-bf.so
@@ -365,6 +371,8 @@ void *calloc( size_t nmemb, size_t size )
 
 void *realloc( void *ptr, size_t size )
 {
+   num_reuses++;
+
    // size 0 is free
    if(size == 0)
    {
