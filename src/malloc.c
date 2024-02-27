@@ -36,6 +36,17 @@ static int max_heap          = 0;
 // env LD_PRELOAD=lib/libmalloc-bf.so tests/bfwf
 // set exec-wrapper env LD_PRELOAD=./lib/libmalloc-bf.so
 
+struct _block 
+{
+   size_t  size;         /* Size of the allocated _block of memory in bytes */
+   struct _block *next;  /* Pointer to the next _block of allocated memory  */
+   bool   free;          /* Is this _block free?                            */
+   char   padding[3];    /* Padding: IENTRTMzMjAgU3jMDEED                   */
+};
+
+/* Free list to track the _blocks available */
+struct _block *heapList = NULL;
+
 /*
  *  \brief printStatistics
  *
@@ -48,6 +59,14 @@ static int max_heap          = 0;
  */
 void printStatistics( void )
 {
+   struct _block *block = heapList;
+
+   while(block)
+   {
+      num_blocks++;
+      block = block->next;
+   }
+
   printf("\nheap management statistics\n");
   printf("mallocs:\t%d\n", num_mallocs );
   printf("frees:\t\t%d\n", num_frees );
@@ -64,17 +83,6 @@ void printStatistics( void )
 // can't coalesce final two blocks because second one points to NULL
 // can't malloc size < ptr->size (needs to split somehow)
 // splits + grows = mallocs
-
-struct _block 
-{
-   size_t  size;         /* Size of the allocated _block of memory in bytes */
-   struct _block *next;  /* Pointer to the next _block of allocated memory  */
-   bool   free;          /* Is this _block free?                            */
-   char   padding[3];    /* Padding: IENTRTMzMjAgU3jMDEED                   */
-};
-
-/* Free list to track the _blocks available */
-struct _block *heapList = NULL;
 
 /*
  * \brief findFreeBlock
@@ -243,6 +251,8 @@ struct _block *growHeap(struct _block *last, size_t size)
  */
 void *malloc(size_t size) 
 {
+   num_requested += size;
+
    // call statistic variables
    if( atexit_registered == 0 )
    {
@@ -297,6 +307,11 @@ void *malloc(size_t size)
    {
       next = growHeap(last, size);
       num_grows++;
+   }
+
+   else
+   {
+      num_reuses++;
    }
 
    // Could not find free _block or grow heap, so just return NULL
