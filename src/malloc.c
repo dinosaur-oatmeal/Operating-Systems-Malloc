@@ -386,8 +386,6 @@ void *calloc( size_t nmemb, size_t size )
 
 void *realloc( void *ptr, size_t size )
 {
-   num_reuses++;
-
    // size 0 is free
    if(size == 0)
    {
