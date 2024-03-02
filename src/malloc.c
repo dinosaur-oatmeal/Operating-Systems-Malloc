@@ -46,6 +46,7 @@ struct _block
 
 /* Free list to track the _blocks available */
 struct _block *heapList = NULL;
+struct _block *nf = NULL;
 
 /*
  *  \brief printStatistics
@@ -180,6 +181,42 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
 // \TODO Put your Next Fit code in this #ifdef block
 #if defined NEXT && NEXT == 0
    /** \TODO Implement next fit here */
+   if(nf && nf->next != NULL)
+   {
+      curr = nf->next;
+
+      while(curr && (curr->free && curr->size >= size) && curr != nf) 
+      {
+         if(curr->next == NULL)
+         {
+            curr = heapList;
+         }
+
+         else
+         {
+            if(curr->next == NULL)
+            {
+               nf = curr;
+            }
+
+            curr = curr->next;
+         }
+      }
+   }
+
+   if(nf == NULL)
+   {
+      while(curr && !(curr->free && curr->size >= size)) 
+      {
+         if(curr->next == NULL)
+         {
+            nf = curr;
+         }
+
+         curr  = curr->next;
+      }
+   }
+
 #endif
 
    return curr;
