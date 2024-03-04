@@ -170,12 +170,6 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
       curr = nf; 
    }
 
-   // restart at top of list if at end
-   else if(curr == NULL)
-   {
-      curr = heapList;
-   }
-
    // traverse list to find first open spot
    while(curr && !(curr->free && curr->size >= size)) 
    {
@@ -186,6 +180,12 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
       if(curr == nf)
       {
          break;
+      }
+
+      // restart at top of list if at end
+      else if(curr == NULL)
+      {
+         curr = heapList;
       }
    }
 
