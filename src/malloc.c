@@ -174,12 +174,12 @@ struct _block *findFreeBlock(struct _block **last, size_t size)
    while(curr && !(curr->free && curr->size >= size)) 
    {
       *last = curr;
-      curr  = curr->next;
+      curr = curr->next;
 
       // exit loop if there is no room for data
       if(curr == nf)
       {
-         break;
+         return NULL;
       }
 
       // restart at top of list if at end
@@ -377,6 +377,7 @@ void free(void *ptr)
       }
 
       curr = curr->next;
+      nf = curr;
    }
 }
 
