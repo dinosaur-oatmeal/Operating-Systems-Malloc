@@ -9,32 +9,51 @@ int main()
   free( ptr );*/
 
   // Modified version to test for report
-  printf("testing malloc, free and realloc");
-  char * ptr1 = malloc(512);
-  char * ptr2 = malloc(256);
+  char * ptr = NULL;
+  char * ptr1 = (char *)malloc(5000000000);
+  char * ptr2 = (char *)malloc(1024);
+  char * ptr3 = (char *)malloc(35);
   free(ptr1);
-  char * ptr3 = malloc(256);
-  char * ptr4 = realloc(ptr2, 512);
+
+  char * ptr_arrayOne[14000];
+  char * ptr_arrayTwo[10000];
+  int j = 0;
+  for (int i = 0; i < 14000; i++ )
+  {
+    ptr_arrayOne[i] = (char *) malloc(1024); 
+
+    if(i % 10 == 0 && i > 0)
+    {
+      free(ptr_arrayOne[i]);
+      ptr_arrayTwo[j] = (char *) malloc(2000);
+      ptr = (char *) malloc(500);
+      j++;
+    }
+  }
+
+  char * ptr4 = malloc(10);
   free(ptr4);
   free(ptr3);
 
-  printf("testing printing in an array");
-  char * ptr_array[15000];
-  int i;
-  for ( i = 0; i < 15000; i++ )
-  {
-    ptr_array[i] = ( char * ) malloc ( 1024 ); 
-    
-    ptr_array[i] = ptr_array[i];
-  }
+  char * ptr5 = malloc(1);
+  free(ptr5);
 
-  for ( i = 0; i < 15000; i++ )
+  for(int k = 0; k < 10000; k++ )
   {
-    if( i % 2 == 0 )
+    if(k % 10 != 0)
     {
-      free( ptr_array[i] );
+      free(ptr_arrayOne[k]);
     }
   }
+
+  for(int m = 0; m < j; m++)
+  {
+    free(ptr_arrayTwo[m]);
+  }
+
+  free(ptr2);
+
+  char ptr6 = (char *) malloc(700000);
 
   return 0;
 }
