@@ -1,17 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 
 int main()
 {
-  /*printf("Running test 1 to test a simple malloc and free\n");
+  printf("Running test 1 to test a simple malloc and free\n");
 
   char * ptr = ( char * ) malloc ( 65535 );
-  free( ptr );*/
+  free( ptr );
 
   // Modified version to test for report
-  srand(time(NULL));
-
+  /*
   char * ptr1 = (char *)malloc(5000000000);
   char * ptr2 = (char *)malloc(1024);
   char * ptr3 = (char *)malloc(35);
@@ -57,6 +55,7 @@ int main()
   }
 
   free(ptr2);
+  */
 
   return 0;
 }
